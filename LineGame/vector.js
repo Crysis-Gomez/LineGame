@@ -87,7 +87,7 @@ var vector = function(x,y){
 		if(!v2.isNormalized()) v2 = v2.clone().normalize();
 		return Math.acos(v1.getDotProd(v2));
 	}
-
+ 
 	this.getPerp = function(){
 		return new vector(-this.y,this.x);
 	}

@@ -10,16 +10,18 @@ $(document).ready(function()
 	var endPosition = null;
 	var mayDraw = false;
 	var mouseIsDown = false;
+	var count = 0.01;
 
 
 	var lineSegment = function(v1,v2){
 		this.startPosition = v1;
 		this.endPosition = v2;
 		this.ctx = ctx;
+		this._color = "blue";
 
 		this.draw = function(){
-			ctx.strokeStyle = "blue";
-      		ctx.lineWidth = 4;
+			ctx.strokeStyle = this._color;
+      		ctx.lineWidth = 1;
 			this.ctx.beginPath();
 		 	this.ctx.moveTo(this.startPosition.x,this.startPosition.y);
 		 	this.ctx.lineTo(this.endPosition.x,this.endPosition.y);
@@ -38,9 +40,9 @@ $(document).ready(function()
 
 			result = cr/rs;
 			result2 = u/rs;
-			 if(0 < result && result < 1 && 0 <result2 && result2 < 1){
-			 	console.log("lines intersection");
-			}
+			if(0 < result && result < 1 && 0 <result2 && result2 < 1){
+			 	this._color = "red"
+			}else this._color = "blue";
 		}
 
 	}
@@ -75,19 +77,23 @@ $(document).ready(function()
 
 
 	//_ball = new ball(50,50,ctx);
-	_line = new lineSegment(new vector(500,500),new vector(0,0),ctx);
-	_line2 = new lineSegment(new vector(200,210),new vector(560,10),ctx);
+	_line = new lineSegment(new vector(100,100),new vector(200,100),ctx);
+	_line2 = new lineSegment(new vector(110,110),new vector(200,10),ctx);
 
 	// _ball2 = new ball(100,50,ctx);
 	// _ball3 = new ball(300,30,ctx);
+ 
+	//rotateLinesegment(_line,90);	
 
 	 if(typeof game_loop != "undefined") clearInterval(game_loop);
 	  	game_loop = setInterval(update, 10);
+	 
+
 
 	 function update(){
-
 	 	paint();
 	 	_line.draw();
+	 	rotateLinesegment(_line,count);	
 	 	_line2.draw();
 	 	_line.lineIntersection(_line2)
 	 }
@@ -101,21 +107,39 @@ $(document).ready(function()
 		ctx.strokeRect(0, 0, w, h);
 	}
 
+	function rotateLinesegment(line,angle){
+		var start = line.startPosition.clone();
+		var end = line.endPosition.clone();
 
-	function drawLine(x,y){
+		var center = line.startPosition.clone();
 		
-		//ctx.fill();
-		ctx.clearRect (0 , 0,w , h );
-		ctx.strokeStyle = "blue";
-		ctx.beginPath();
-      	ctx.moveTo(startPosition.x, startPosition.y);
-      	ctx.lineTo(x, y);
-      	ctx.lineWidth = 4;
-      	ctx.stroke();
-      	console.log("paint")
+		center2 =  center.add(end);
+		center3 = center2.multiply(0.5);
 
+		na = start.substract(center3);
+		nb = end.substract(center3);
+
+		var rotateVector = function(v,angle){
+			var s = Math.sin(angle);
+			var c = Math.cos(angle);
+
+			var nx = c * v.x - s * v.y;
+			var ny = s * v.x + c * v.y;
+
+			return new vector(nx,ny);
+
+		}
+
+		n_1  =  rotateVector(na,angle);
+		n_2 =  n_1.add(center3);
+
+		n_3 =  rotateVector(nb,angle);
+		n_4 = n_3.add(center3);
+
+	
+		line.startPosition = n_2;
+		line.endPosition = n_4;
 	}
-
 
 	canvas.onmousedown = function(e){
 		
