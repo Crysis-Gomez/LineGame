@@ -29,6 +29,16 @@ $(document).ready(function()
 
 		}
 
+		this.getDirection = function(){
+			return this.endPosition.substract(this.startPosition);
+		}
+
+		this.getNormal = function(){
+			dir = this.getDirection();
+			perp = dir.getPerp();
+			return perp.normalize();
+		}
+
 		this.lineIntersection  = function(v){
 			
 			pr =  this.endPosition.substract(this.startPosition);
@@ -42,29 +52,59 @@ $(document).ready(function()
 			result2 = u/rs;
 			if(0 < result && result < 1 && 0 <result2 && result2 < 1){
 			 	this._color = "red"
-			}else this._color = "blue";
+			 	return true
+			}
+			else{ 
+				this._color = "blue";
+				return false;
+			}
 		}
 
 	}
 
 	var ball = function(x,y,ctx){
 		this.position = new vector(x,y);
-		this.velocity = new vector(4,2);
+		this.velocity = new vector(1,3);
 		this.radius = 10;
 		this.ctx = ctx;
+		this.line = null;
+		this.isColliding = false;
 
 
 		this.update = function(){
+			if(this.isColliding) return;
 			this.position.x += this.velocity.x;
 			this.position.y += this.velocity.y;
-			this.edge();
-			this.draw();
-		}
-
-		this.edge = function(){
 
 		}
 
+		this.lineIntersection  = function(v)
+		{
+			dx = this.position.x - (this.position.x + this.velocity.x);
+			dy = this.position.y - (this.position.y + this.velocity.y);
+			start = this.position.clone();
+			end = this.position.clone();
+			end = end.add(this.velocity);
+			dx = v.endPosition.x - v.startPosition.x;
+			dy = v.endPosition.y - v.startPosition.y;
+
+			normalVector = new vector(-dy,dx);
+			normalVector = normalVector.normalize();
+			radiusVector = normalVector.multiply(this.radius);
+			start = this.position.add(radiusVector);
+
+			this.line =new lineSegment(new vector(start.x,start.y),new vector(end.x,end.y),this.ctx);
+			
+			
+			if(this.line.lineIntersection(v))
+			{
+				// this.position.x -= this.velocity.x;
+				// this.position.y -= this.velocity.y;
+				dot = this.velocity.getDotProd (v.getNormal());
+				vec = v.getNormal().multiply(2*dot);
+				this.velocity = this.velocity.substract(vec)
+			}
+		}
 
 		this.draw = function(){
 			this.ctx.beginPath();
@@ -76,9 +116,11 @@ $(document).ready(function()
 	}
 
 
-	//_ball = new ball(50,50,ctx);
-	_line = new lineSegment(new vector(100,100),new vector(200,100),ctx);
-	_line2 = new lineSegment(new vector(110,110),new vector(200,10),ctx);
+	_ball = new ball(150,150,ctx);
+	_line = new lineSegment(new vector(100,100),new vector(200,300),ctx);
+	_line2 = new lineSegment(new vector(200,300),new vector(300,100),ctx);
+	_line3 = new lineSegment(new vector(300,100),new vector(100,100),ctx);
+	//_line2 = new lineSegment(new vector(110,110),new vector(200,10),ctx);
 
 	// _ball2 = new ball(100,50,ctx);
 	// _ball3 = new ball(300,30,ctx);
@@ -91,11 +133,20 @@ $(document).ready(function()
 
 
 	 function update(){
+	 	
 	 	paint();
+	 	_ball.update();
+	 	_ball.lineIntersection(_line);
+	 	_ball.lineIntersection(_line2);
+	 	_ball.lineIntersection(_line3);
+	 	
 	 	_line.draw();
-	 	rotateLinesegment(_line,count);	
 	 	_line2.draw();
-	 	_line.lineIntersection(_line2)
+	 	_line3.draw();
+	 	_ball.draw();
+	 	//rotateLinesegment(_line,count);	
+	 	//_line2.draw();
+	 	//_line.lineIntersection(_line2)
 	 }
 
 

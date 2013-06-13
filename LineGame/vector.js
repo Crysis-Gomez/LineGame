@@ -83,7 +83,8 @@ var vector = function(x,y){
 
 
 	this.getAngleBetween = function(v2){
-		if(!this.isNormalized()) v1 = this.clone().normalize();
+		v1 = this.clone();
+		if(!this.isNormalized()) v1 = v1.normalize();
 		if(!v2.isNormalized()) v2 = v2.clone().normalize();
 		return Math.acos(v1.getDotProd(v2));
 	}
@@ -101,6 +102,7 @@ var vector = function(x,y){
 		var dy = v2.y - this.y;
 		return dx * dx + dy * dy;
 	}
+
 
 	this.distance = function(v2){
 		return Math.sqrt(this.distanceSQ(v2))
@@ -127,7 +129,10 @@ var vector = function(x,y){
 	}
 
 	this.multiply = function(value){
-		return new vector(this.x *value,this.y *value);
+		//console.log(this.x,this.y)
+		x = this.x *value;
+		y = this.y *value;
+		return new vector(x,y);
 	}
 
 	this.componentOnto = function(v2){
